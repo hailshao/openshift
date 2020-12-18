@@ -1,0 +1,451 @@
+{
+    "kind": "Template",
+    "apiVersion": "v1",
+    "metadata": {
+        "name": "rabbitmq",
+        "creationTimestamp": null,
+        "annotations": {
+            "description": "RabbitMQ Deployment and Runtime Components",
+            "iconClass": "icon-rabbitmq",
+            "tags": "erlang,rabbitmq"
+        }
+    },
+    "objects": [
+        {
+            "apiVersion": "v1",
+            "kind": "ServiceAccount",
+            "metadata": {
+                "labels": {
+                    "application": "${APPLICATION_NAME}"
+                },
+                "name": "${APPLICATION_NAME}"
+            }
+        },
+        {
+            "apiVersion": "rbac.authorization.k8s.io/v1",
+            "kind": "Role",
+            "metadata": {
+                "labels": {
+                    "application": "${APPLICATION_NAME}"
+                },
+                "name": "${APPLICATION_NAME}-endpoint-reader"
+            },
+            "rules": [
+                {
+                    "apiGroups": [
+                        ""
+                    ],
+                    "resources": [
+                        "endpoints"
+                    ],
+                    "verbs": [
+                        "get"
+                    ]
+                }
+            ]
+        },
+        {
+            "apiVersion": "rbac.authorization.k8s.io/v1",
+            "kind": "RoleBinding",
+            "metadata": {
+                "labels": {
+                    "application": "${APPLICATION_NAME}"
+                },
+                "name": "${APPLICATION_NAME}-endpoint-reader"
+            },
+            "roleRef": {
+                "apiGroup": "rbac.authorization.k8s.io",
+                "kind": "Role",
+                "name": "${APPLICATION_NAME}-endpoint-reader",
+                "namespace": "${NAMESPACE}"
+            },
+            "subjects": [
+                {
+                    "kind": "ServiceAccount",
+                    "name": "${APPLICATION_NAME}",
+                    "namespace": "${NAMESPACE}"
+                }
+            ]
+        },
+        {
+            "apiVersion": "v1",
+            "kind": "Service",
+            "metadata": {
+                "labels": {
+                    "application": "${APPLICATION_NAME}"
+                },
+                "name": "${APPLICATION_NAME}"
+            },
+            "spec": {
+                "ports": [
+                    {
+                        "name": "epmd",
+                        "port": 4369,
+                        "targetPort": "epmd"
+                    },
+                    {
+                        "name": "amqp",
+                        "port": 5672,
+                        "targetPort": "amqp"
+                    },
+                    {
+                        "name": "dist",
+                        "port": 25672,
+                        "targetPort": "dist"
+                    },
+                    {
+                        "name": "stats",
+                        "port": 15672,
+                        "targetPort": "stats"
+                    }
+                ],
+                "selector": {
+                    "application": "${APPLICATION_NAME}"
+                },
+                "sessionAffinity": "None",
+                "type": "ClusterIP"
+            }
+        },
+        {
+            "apiVersion": "v1",
+            "kind": "Service",
+            "metadata": {
+                "labels": {
+                    "application": "${APPLICATION_NAME}"
+                },
+                "name": "${APPLICATION_NAME}-headless"
+            },
+            "spec": {
+                "clusterIP": "None",
+                "ports": [
+                    {
+                        "name": "epmd",
+                        "port": 4369,
+                        "targetPort": "epmd"
+                    },
+                    {
+                        "name": "amqp",
+                        "port": 5672,
+                        "targetPort": "amqp"
+                    },
+                    {
+                        "name": "dist",
+                        "port": 25672,
+                        "targetPort": "dist"
+                    },
+                    {
+                        "name": "stats",
+                        "port": 15672,
+                        "targetPort": "stats"
+                    }
+                ],
+                "selector": {
+                    "application": "${APPLICATION_NAME}"
+                }
+            }
+        },
+        {
+            "apiVersion": "apps/v1beta1",
+            "kind": "StatefulSet",
+            "metadata": {
+                "labels": {
+                    "application": "${APPLICATION_NAME}"
+                },
+                "name": "${APPLICATION_NAME}"
+            },
+            "spec": {
+                "replicas": "${RABBITMQ_REPLICAS}",
+                "selector": {
+                    "matchLabels": {
+                        "application": "${APPLICATION_NAME}"
+                    }
+                },
+                "serviceName": "${APPLICATION_NAME}",
+                "template": {
+                    "metadata": {
+                        "labels": {
+                            "application": "${APPLICATION_NAME}"
+                        }
+                    },
+                    "spec": {
+                        "containers": [
+                            {
+                                "command": [
+                                    "bash",
+                                    "-ec",
+                                    "mkdir -p /opt/bitnami/rabbitmq/.rabbitmq/\nmkdir -p /opt/bitnami/rabbitmq/etc/rabbitmq/\n#persist the erlang cookie in both places for server and cli tools\necho $RABBITMQ_ERL_COOKIE \u003e /opt/bitnami/rabbitmq/var/lib/rabbitmq/.erlang.cookie\ncp /opt/bitnami/rabbitmq/var/lib/rabbitmq/.erlang.cookie /opt/bitnami/rabbitmq/.rabbitmq/\n#change permission so only the user has access to the cookie file\nchmod 600 /opt/bitnami/rabbitmq/.rabbitmq/.erlang.cookie /opt/bitnami/rabbitmq/var/lib/rabbitmq/.erlang.cookie\n#copy the mounted configuration to both places\ncp  /opt/bitnami/rabbitmq/conf/* /opt/bitnami/rabbitmq/etc/rabbitmq\n# Apply resources limits\nulimit -n \"${RABBITMQ_ULIMIT_NOFILES}\"\n#replace the default user and password that is generated\nsed -i \"s/default_user=user/default_user=$RABBITMQ_USER/g\" /opt/bitnami/rabbitmq/etc/rabbitmq/rabbitmq.conf\nsed -i \"s/CHANGEME/$RABBITMQ_PASSWORD/g\" /opt/bitnami/rabbitmq/etc/rabbitmq/rabbitmq.conf\n# Move logs to stdout\nln -sF /dev/stdout /opt/bitnami/rabbitmq/var/log/rabbitmq/rabbit@${MY_POD_IP}.log\nln -sF /dev/stdout /opt/bitnami/rabbitmq/var/log/rabbitmq/rabbit@${MY_POD_IP}_upgrade.log\nexec rabbitmq-server\n"
+                                ],
+                                "env": [
+                                    {
+                                        "name": "MY_POD_IP",
+                                        "valueFrom": {
+                                            "fieldRef": {
+                                                "fieldPath": "status.podIP"
+                                            }
+                                        }
+                                    },
+                                    {
+                                        "name": "MY_POD_NAME",
+                                        "valueFrom": {
+                                            "fieldRef": {
+                                                "fieldPath": "metadata.name"
+                                            }
+                                        }
+                                    },
+                                    {
+                                        "name": "MY_POD_NAMESPACE",
+                                        "valueFrom": {
+                                            "fieldRef": {
+                                                "fieldPath": "metadata.namespace"
+                                            }
+                                        }
+                                    },
+                                    {
+                                        "name": "K8S_SERVICE_NAME",
+                                        "value": "${APPLICATION_NAME}-headless"
+                                    },
+                                    {
+                                        "name": "K8S_ADDRESS_TYPE",
+                                        "value": "ip"
+                                    },
+                                    {
+                                        "name": "RABBITMQ_NODENAME",
+                                        "value": "rabbit@$(MY_POD_IP)"
+                                    },
+                                    {
+                                        "name": "RABBITMQ_ULIMIT_NOFILES",
+                                        "value": "65536"
+                                    },
+                                    {
+                                        "name": "RABBITMQ_USE_LONGNAME",
+                                        "value": "true"
+                                    },
+                                    {
+                                        "name": "RABBITMQ_ERL_COOKIE",
+                                        "valueFrom": {
+                                            "secretKeyRef": {
+                                                "key": "rabbitmq-erlang-cookie",
+                                                "name": "${APPLICATION_NAME}-secret"
+                                            }
+                                        }
+                                    },
+                                    {
+                                        "name": "RABBITMQ_PASSWORD",
+                                        "valueFrom": {
+                                            "secretKeyRef": {
+                                                "key": "rabbitmq-password",
+                                                "name": "${APPLICATION_NAME}-secret"
+                                            }
+                                        }
+                                    },
+                                    {
+                                        "name": "RABBITMQ_USER",
+                                        "valueFrom": {
+                                            "secretKeyRef": {
+                                                "key": "rabbitmq-user",
+                                                "name": "${APPLICATION_NAME}-secret"
+                                            }
+                                        }
+                                    }
+                                ],
+                                "image": "registry.paas.cnooc:5000/bitnami/rabbitmq:${RABBITMQ_VERSION}",
+                                "imagePullPolicy": "IfNotPresent",
+                                "livenessProbe": {
+                                    "exec": {
+                                        "command": [
+                                            "sh",
+                                            "-c",
+                                            "test \"$(curl -sS -f --user $RABBITMQ_USER:$RABBITMQ_PASSWORD 127.0.0.1:15672/api/healthchecks/node)\" = '{\"status\":\"ok\"}'"
+                                        ]
+                                    },
+                                    "failureThreshold": 6,
+                                    "initialDelaySeconds": 120,
+                                    "periodSeconds": 5,
+                                    "successThreshold": 1,
+                                    "timeoutSeconds": 5
+                                },
+                                "name": "${APPLICATION_NAME}",
+                                "ports": [
+                                    {
+                                        "containerPort": 4369,
+                                        "name": "epmd"
+                                    },
+                                    {
+                                        "containerPort": 5672,
+                                        "name": "amqp"
+                                    },
+                                    {
+                                        "containerPort": 25672,
+                                        "name": "dist"
+                                    },
+                                    {
+                                        "containerPort": 15672,
+                                        "name": "stats"
+                                    }
+                                ],
+                                "readinessProbe": {
+                                    "exec": {
+                                        "command": [
+                                            "sh",
+                                            "-c",
+                                            "test \"$(curl -sS -f --user $RABBITMQ_USER:$RABBITMQ_PASSWORD 127.0.0.1:15672/api/healthchecks/node)\" = '{\"status\":\"ok\"}'"
+                                        ]
+                                    },
+                                    "failureThreshold": 3,
+                                    "initialDelaySeconds": 10,
+                                    "periodSeconds": 5,
+                                    "successThreshold": 1,
+                                    "timeoutSeconds": 3
+                                },
+                                "resources": {
+                                    "limits": {
+                                        "cpu": "4",
+                                        "memory": "16Gi"
+                                    },
+                                    "requests": {
+                                        "cpu": "4",
+                                        "memory": "16Gi"
+                                    }
+                                },
+                                "terminationMessagePath": "/dev/termination-log",
+                                "terminationMessagePolicy": "File",
+                                "volumeMounts": [
+                                    {
+                                        "mountPath": "/opt/bitnami/rabbitmq/conf",
+                                        "name": "${APPLICATION_NAME}-config-volume"
+                                    },
+                                    {
+                                        "mountPath": "/opt/bitnami/rabbitmq/var/lib/rabbitmq/",
+                                        "name": "${APPLICATION_NAME}-data"
+                                    }
+                                ]
+                            }
+                        ],
+                        "dnsPolicy": "ClusterFirst",
+                        "restartPolicy": "Always",
+                        "securityContext": {
+                            "fsGroup": 1001,
+                            "runAsUser": 1001
+                        },
+                        "serviceAccountName": "${APPLICATION_NAME}",
+                        "terminationGracePeriodSeconds": 10,
+                        "volumes": [
+                            {
+                                "configMap": {
+                                    "items": [
+                                        {
+                                            "key": "rabbitmq.conf",
+                                            "path": "rabbitmq.conf"
+                                        },
+                                        {
+                                            "key": "enabled_plugins",
+                                            "path": "enabled_plugins"
+                                        }
+                                    ],
+                                    "name": "${APPLICATION_NAME}-configmap"
+                                },
+                                "name": "${APPLICATION_NAME}-config-volume"
+                            }
+                        ]
+                    }
+                },
+                "volumeClaimTemplates": [
+                    {
+                        "metadata": {
+                            "labels": {
+                                "application": "${APPLICATION_NAME}"
+                            },
+                            "name": "${APPLICATION_NAME}-data"
+                        },
+                        "spec": {
+                            "accessModes": [
+                                "ReadWriteOnce"
+                            ],
+                            "resources": {
+                                "requests": {
+                                    "storage": "8Gi"
+                                }
+                            }
+                        }
+                    }
+                ]
+            }
+        },
+        {
+            "apiVersion": "v1",
+            "data": {
+                "enabled_plugins": "[rabbitmq_management, rabbitmq_peer_discovery_k8s].",
+                "rabbitmq.conf": "##username and password\ndefault_user=user\ndefault_pass=CHANGEME\n## Clustering\ncluster_formation.peer_discovery_backend  = rabbit_peer_discovery_k8s\ncluster_formation.k8s.host = kubernetes.default.svc.cluster.local\ncluster_formation.node_cleanup.interval = 10\ncluster_formation.node_cleanup.only_log_warning = false\ncluster_partition_handling = autoheal\n## queue master locator\nqueue_master_locator=min-masters\n## enable guest user\nloopback_users.guest = false"
+            },
+            "kind": "ConfigMap",
+            "metadata": {
+                "labels": {
+                    "application": "${APPLICATION_NAME}"
+                },
+                "name": "${APPLICATION_NAME}-configmap"
+            }
+        },
+        {
+            "apiVersion": "v1",
+            "kind": "Secret",
+            "metadata": {
+                "labels": {
+                    "application": "${APPLICATION_NAME}"
+                },
+                "name": "${APPLICATION_NAME}-secret"
+            },
+            "stringData": {
+                "rabbitmq-erlang-cookie": "${RABBITMQ_ERL_COOKIE}",
+                "rabbitmq-password": "${RABBITMQ_PASSWORD}",
+                "rabbitmq-user": "${DEFAULT_USER}"
+            },
+            "type": "Opaque"
+        }
+    ],
+    "parameters": [
+        {
+            "name": "NAMESPACE",
+            "description": "The namespace where to deploy the application.",
+            "required": true
+        },
+        {
+            "name": "APPLICATION_NAME",
+            "description": "The name for the application.",
+            "value": "rabbitmq",
+            "required": true
+        },
+        {
+            "name": "RABBITMQ_VERSION",
+            "description": "RabbitMQ version to build",
+            "value": "3.7.9",
+            "required": true
+        },
+        {
+            "name": "RABBITMQ_REPLICAS",
+            "description": "The number of rabbitmq replicas will be deployed",
+            "value": "3",
+            "required": true
+        },
+        {
+            "name": "DEFAULT_USER",
+            "description": "RabbitMQ default user name",
+            "value": "user",
+            "required": true
+        },
+        {
+            "name": "RABBITMQ_PASSWORD",
+            "description": "Password for the RabbitMQ connection user",
+            "generate": "expression",
+            "from": "[a-zA-Z0-9]{10}"
+        },
+        {
+            "name": "RABBITMQ_ERL_COOKIE",
+            "description": "Persist the erlang cookie for server and cli tools",
+            "generate": "expression",
+            "from": "[a-zA-Z0-9]{32}"
+        }
+    ],
+    "labels": {
+        "template": "rabbitmq"
+    }
+}

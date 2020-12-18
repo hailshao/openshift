@@ -1,0 +1,17 @@
+1\jws31-tomcat8-basic-s2i
+	bis
+	efdc
+2\mongodb-persistent
+	mongodb
+3\openjdk18-web-basic-s2i
+	datacenter-backend, #59
+	gcreport-backend, #71
+	gcreport-backend-private, #6
+	reltxn-backend, #18 	
+4\oraclejdk8-s2i		
+	datacenter-backend-oraclejdk, #1 
+5\rabbitmq
+	rabbitmq
+6\redis-persistent
+	redis		
+	
