@@ -1,0 +1,19 @@
+查询有哪些模板
+oc get templates -n openshift
+导出模板
+oc export template jws31-tomcat8-basic-s2i -n openshift -o json > jws31-tomcat8-basic-s2i.json
+导入模板
+oc create -f ./jws31-tomcat8-basic-s2i.json
+http://v1.uncontained.io/playbooks/fundamentals/template_development_guide.html
+
+
+------------------------------openjdk18模板导入后使用依赖的内容 begin-------------------------------------
+报错1：Reason: Error resolving ImageStreamTag redhat-openjdk18-openshift:1.4 in namespace openshift: imagestreams.image.openshift.io "redhat-openjdk18-openshift" not found
+在以下界面搜索“redhat-openjdk18-openshift”
+https://catalog.redhat.com/software/containers/search
+执行
+oc import-image redhat-openjdk-18/openjdk18-openshift --from=registry.access.redhat.com/redhat-openjdk-18/openjdk18-openshift --confirm
+变更build的yml文件内容
+redhat-openjdk18-openshift:1.4 => openjdk18-openshift:latest
+
+------------------------------openjdk18模板导入后使用依赖的内容 end-------------------------------------
