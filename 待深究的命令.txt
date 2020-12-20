@@ -1,0 +1,9 @@
+sudo usermod -aG docker jq
+newgrp docker
+
+docker ps -a
+rm -rf /var/lib/origin 
+
+
+sudo systemctl daemon-reload
+sudo systemctl restart docker

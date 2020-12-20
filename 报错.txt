@@ -1,0 +1,24 @@
+10:41:27 AM 	Warning 	Unhealthy  	(combined from similar events): Readiness probe failed: % Total % Received % Xferd Average Speed Time Time Time Current Dload Upload Total Spent Left Speed 0 0 0 0 0 0 0 0 --:--:-- --:--:-- --:--:-- 0 100 17 0 17 0 0 705 0 --:--:-- --:--:-- --:--:-- 739
+17 times in the last 18 minutes
+10:38:37 AM 	Warning 	Unhealthy  	Readiness probe failed: % Total % Received % Xferd Average Speed Time Time Time Current Dload Upload Total Spent Left Speed 0 0 0 0 0 0 0 0 --:--:-- --:--:-- --:--:-- 0 100 17 0 17 0 0 1539 0 --:--:-- --:--:-- --:--:-- 1700
+10:38:27 AM 	Warning 	Unhealthy  	Readiness probe failed: % Total % Received % Xferd Average Speed Time Time Time Current Dload Upload Total Spent Left Speed 0 0 0 0 0 0 0 0 --:--:-- --:--:-- --:--:-- 0 100 17 0 17 0 0 1091 0 --:--:-- --:--:-- --:--:-- 1133
+10:38:17 AM 	Warning 	Unhealthy  	Readiness probe failed: % Total % Received % Xferd Average Speed Time Time Time Current Dload Upload Total Spent Left Speed 0 0 0 0 0 0 0 0 --:--:-- --:--:-- --:--:-- 0 100 17 0 17 0 0 674 0 --:--:-- --:--:-- --:--:-- 680
+10:38:07 AM 	Warning 	Unhealthy  	Readiness probe failed: % Total % Received % Xferd Average Speed Time Time Time Current Dload Upload Total Spent Left Speed 0 0 0 0 0 0 0 0 --:--:-- --:--:-- --:--:-- 0 100 17 0 17 0 0 1075 0 --:--:-- --:--:-- --:--:-- 1133
+10:37:57 AM 	Warning 	Unhealthy  	Readiness probe failed: % Total % Received % Xferd Average Speed Time Time Time Current Dload Upload Total Spent Left Speed 0 0 0 0 0 0 0 0 --:--:-- --:--:-- --:--:-- 0 100 17 0 17 0 0 1416 0 --:--:-- --:--:-- --:--:-- 1545
+10:37:47 AM 	Warning 	Unhealthy  	Readiness probe failed: % Total % Received % Xferd Average Speed Time Time Time Current Dload Upload Total Spent Left Speed 0 0 0 0 0 0 0 0 --:--:-- --:--:-- --:--:-- 0 100 17 0 17 0 0 1709 0 --:--:-- --:--:-- --:--:-- 1888
+10:37:37 AM 	Warning 	Unhealthy  	Readiness probe failed: % Total % Received % Xferd Average Speed Time Time Time Current Dload Upload Total Spent Left Speed 0 0 0 0 0 0 0 0 --:--:-- --:--:-- --:--:-- 0 100 17 0 17 0 0 1040 0 --:--:-- --:--:-- --:--:-- 1062
+10:37:27 AM 	Warning 	Unhealthy  	Readiness probe failed: % Total % Received % Xferd Average Speed Time Time Time Current Dload Upload Total Spent Left Speed 0 0 0 0 0 0 0 0 --:--:-- --:--:-- --:--:-- 0 100 17 0 17 0 0 888 0 --:--:-- --:--:-- --:--:-- 944
+10:37:17 AM 	Warning 	Unhealthy  	Readiness probe failed: % Total % Received % Xferd Average Speed Time Time Time Current Dload Upload Total Spent Left Speed 0 0 0 0 0 0 0 0 --:--:-- --:--:-- --:--:-- 0 100 17 0 17 0 0 1398 0 --:--:-- --:--:-- --:--:-- 1545 
+
+
+
+echo `curl -I "https://www.baidu.com"`
+  % Total    % Received % Xferd  Average Speed   Time    Time     Time  Current
+                                 Dload  Upload   Total   Spent    Left  Speed
+  0   277    0     0    0     0      0      0 --:--:-- --:--:-- --:--:--     0
+ Server: bfe/1.0.8.1813 Jun 2016 02:50:08 GMTproxy-revalidate, no-transform
+
+
+
+
+Readiness Probe: /bin/bash -c curl 'http://localhost:8188/actuator/health' |grep -iq 'UP'

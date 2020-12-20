@@ -15,3 +15,12 @@
 6\redis-persistent
 	redis		
 	
+
+
+gcreport-web-25-l6nrv
+Mount: gcreport-web-cu3x8, subpath nginx.conf → /etc/opt/rh/rh-nginx116/nginx/nginx.conf
+Mount: gcreport-web-cu3x8, subpath os.config.js → /opt/app-root/src/config/os.config.js 
+Mount: default-token-k5lk8 → /var/run/secrets/kubernetes.io/serviceaccount read-only
+
+
+oc exec gcreport-web-25-l6nrv -- more  /etc/opt/rh/rh-nginx116/nginx/nginx.conf

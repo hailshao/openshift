@@ -1,0 +1,45 @@
+pwd (print work directory)
+find / -name admin.*
+oc cp gcreport-backend-23-b5v57:/deployments/logs ~/log1、
+ oc status  --查看报错信息
+ su全称是switch user
+
+/opt/app-root/src/config/os.config.js
+/etc/opt/rh/rh-nginx112/nginx/nginx.conf
+
+
+subPath: nginx.conf
+
+
+
+dcoker run -it --privileged=true a13da2ec2f0b
+
+
+
+
+
+openshift容器用户权限
+oc adm policy add-scc-to-user anyuid -z default
+https://www.openshift.com/blog/getting-any-docker-image-running-in-your-own-openshift-cluster
+
+Security Context Constraints
+
+
+oc adm policy add-scc-to-user anyuid system:serviceaccount:gcreport:default
+oc adm policy add-scc-to-user privileged system:serviceaccount:gcreport:default
+
+
+oc create serviceaccount useroot
+oc adm policy add-scc-to-user anyuid -z useroot
+
+oc create serviceaccount jboss
+oc adm policy add-scc-to-user anyuid -z jboss
+
+ oc patch dc/hello --patch '{"spec":{"template":{"spec":{"serviceAccountName": "useroot"}}}}'
+ 
+ 
+ https://blog.csdn.net/weixin_43902588/article/details/103548054
+ https://github.com/liuxiaoyu-git/openshift-dockerfile-example.git
+ 
+ oc new-app --name sleep https://github.com/liuxiaoyu-git/openshift-dockerfile-example.git
+ oc logs bc/sleep

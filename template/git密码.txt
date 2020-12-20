@@ -1,0 +1,22 @@
+1、Resources->Secrets->新建gitlab-secret-shaohailin
+
+2、Builds->Builds->具体的行进去->Edit YAML
+找到以下位置添加密码认证信息
+“
+sourceSecret:
+      name: gitlab-secret-shaohailin
+” 
+最终由
+  source:
+    git:
+      ref: master
+      uri: 'http://nvwa.jiuqi.com.cn/gitlab/mytest/gcreport.git'
+    type: Git
+变为  
+  source:
+    git:
+      ref: master
+      uri: 'http://nvwa.jiuqi.com.cn/gitlab/mytest/gcreport.git'
+    sourceSecret:
+      name: gitlab-secret-shaohailin
+    type: Git

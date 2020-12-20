@@ -1,0 +1,17 @@
+1、sudo vim /etc/docker/daemon.json
+说明：第一行防https访问报错，第二行配置为硬盘空间较多的目录中
+{
+        "insecure-registries":["172.30.1.1:5000"],
+        "data-root": "/home/jq/docker"
+}
+
+
+
+2、启动
+sudo oc cluster up \
+    --use-existing-config=true \
+     --skip-registry-check=true \
+    --host-config-dir='/home/jq/openshift/local/config' \
+    --host-data-dir='/home/jq/openshift/local/data' \
+    --host-pv-dir='/home/jq/openshift/local/pv' \
+    --host-volumes-dir='/home/jq/openshift/local/volumes' 
