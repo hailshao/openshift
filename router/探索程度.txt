@@ -1,0 +1,5 @@
+目前探索程度：指定格式的router，可以访问openshift服务，如下：
+backend.127.0.0.1.nip.io
+
+https://docs.openshift.com/container-platform/3.9/architecture/networking/routes.html
+https://docs.openshift.com/container-platform/3.9/install_config/install/prerequisites.html#prereq-dns

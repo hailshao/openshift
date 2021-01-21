@@ -15,3 +15,6 @@ sudo oc cluster up \
     --host-data-dir='/home/jq/openshift/local/data' \
     --host-pv-dir='/home/jq/openshift/local/pv' \
     --host-volumes-dir='/home/jq/openshift/local/volumes' 
+    
+    
+    1800*1000 s  30∑÷÷”

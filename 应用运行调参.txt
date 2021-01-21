@@ -1,2 +1,27 @@
 JAVA_OPTS
 GC_MAX_METASPACE_SIZE
+https://jmtd.net/tmp/openjdk-container-docs/openjdk18-openshift.html
+
+没有netstat命令的时候，curl也可以测试端口
+
+
+
+负载均衡
+oc annotate route myroute --overwrite haproxy.router.openshift.io/balance=roundrobin 
+https://blog.csdn.net/weixin_43902588/article/details/103543191
+https://docs.openshift.com/container-platform/3.6/architecture/networking/routes.html#route-specific-annotations
+
+
+
+健康检查
+/bin/bash -c 'curl 'http://localhost:8188/actuator/health' | grep -iq 'UP''
+在Linux中可以使用$?获取上一条命令的退出状态码
+https://blog.csdn.net/nicai_xiaoqinxi/article/details/85055086
+
+
+知识点：/bin/bash -c后接字符串,让bash将一个字符串作为完整的命令来执行
+
+/bin/bash -c 'curl --noproxy '*' -s 'http://localhost:8188/actuator/health' |grep -iq 'UP''
+
+/bin/bash -c 'curl --noproxy '*' -s 'http://localhost:8080' |grep -iq '123''
+

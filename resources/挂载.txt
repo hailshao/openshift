@@ -1,0 +1,8 @@
+1、补充一行内容：
+	subPath: application-hello2.properties
+	变为	
+volumeMounts:
+  - mountPath: /deployments/application-hello2.properties
+    name: backend-mmhox
+    readOnly: true
+    subPath: application-hello2.properties
